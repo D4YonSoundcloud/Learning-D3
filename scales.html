@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scales</title>
+</head>
+<style>
+    body {
+        font-family: "Helvetica Neue", Helvetica, sans-serif;
+        font-size: 12px;
+        color: #333;
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        justify-content: center;
+    }
+    text {
+        fill: #555;
+    }
+    .inner text {
+        text-anchor: middle;
+    }
+    svg{
+        margin-top: 0.5%;
+        margin-bottom: 0.5%;
+    }
+    .inner-power text {
+        text-anchor: middle;
+    }
+    .inner-square-root text {
+        text-anchor: middle;
+    }
+    .inner-scale-log text {
+        text-anchor: middle;
+    }
+    .inner-scale-time text {
+        text-anchor: middle;
+    }
+    .inner-scale-sequential text {
+         text-anchor: middle;
+     }
+    .axis-without-nice-text text {
+        text-anchor: middle;
+    }
+    .axis-with-nice-text text {
+        text-anchor: middle;
+    }
+    .scale-point text {
+        text-anchor: middle;
+    }
+    rect {
+        cursor: pointer;
+    }
+    rect:hover{
+        opacity: 0.5;
+    }
+    .info {
+        margin-top: 0;
+    }
+</style>
+<body>
+<svg width="1000" height="40">
+    <g class="inner" transform="translate(40, 30)">
+    </g>
+</svg>
+<svg width="1000" height="40">
+    <g class="inner-power" transform="translate(40, 30)">
+    </g>
+</svg>
+<svg width="1000" height="60">
+    <g class="inner-square-root" transform="translate(40, 30)">
+    </g>
+</svg>
+<svg width="1000" height="60">
+    <g class="inner-scale-log" transform="translate(40, 30)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="inner-scale-time" transform="translate(40, 40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="inner-scale-sequential" transform="translate(40, 40)">
+    </g>
+</svg>
+<svg width="1000" height="580">
+    <g class="inner-scale-sequential-interpolators" transform="translate(40, 40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="axis-without-nice" transform="translate(40, 40)">
+    </g>
+    <g class="axis-without-nice-text" transform="translate(40,40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="axis-with-nice" transform="translate(40, 40)">
+    </g>
+    <g class="axis-with-nice-text" transform="translate(40,40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="segments" transform="translate(40, 40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g transform="translate(40, 0)">
+        <g class="axis-inversion" transform="translate(0, 40)"></g>
+        <rect class="click-area"></rect>
+    </g>
+</svg>
+<div class="info">Click on the grey band</div>
+<svg width="1000" height="80">
+    <g class="scale-quantize" transform="translate(40,40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="scale-quantile" transform="translate(40,40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="scale-threshold" transform="translate(40,40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="scale-ordinal" transform="translate(40,40)">
+    </g>
+</svg>
+<svg width="1000" height="200">
+    <g class="scale-band-axis" transform="translate(40, 140)">
+    </g>
+    <g class="scale-band-axis-y" transform="translate(35, 40)">
+    </g>
+    <g class="scale-band" transform="translate(40,40)">
+    </g>
+</svg>
+<svg width="1000" height="80">
+    <g class="scale-point" transform="translate(40,40)">
+    </g>
+</svg>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+<!--linear scale, power scale, square root scale, log scale, time scale-->
+<script>
+    let myData = [0, 1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    let logData = [10, 100, 1000, 10000, 100000, 1000000];
+    let dateData = [new Date(2016, 0, 1), new Date(2016, 3, 1), new Date(2016, 6, 1), new Date(2017, 0, 1)];
+
+    //the range is from 0px to 600px, while the domain is the integer or values to scale to that range
+    let myScale = d3.scaleLinear().domain([0, 100]).range([0, 900])
+    let powerScale = d3.scalePow().exponent(0.5).domain([0,100]).range([0,900])
+    //use sqrt for circles the range is the radius we want, based on the data
+    let squareRootScale = d3.scaleSqrt().domain([0,100]).range([0,30])
+    let logScale = d3.scaleLog().domain([10, 1000000]).range([0, 900])
+    let timeScale = d3.scaleTime().domain([new Date(2016, 0, 1), new Date(2017, 0, 1)]).range([0, 900]);
+
+    /**
+     * Linear Scale
+    */
+    d3.select('svg .inner') //select the group inner class of the svg
+        .selectAll('circle') //select all circles, even though they do not exist yet
+        .data(myData)
+        .enter() //enter, so that the user can append, we don't need to call merge since there was no data before
+        .append('circle') //append circle elements for the data in myData
+        .attr('r',  3)
+        .attr('cx', (d) => {
+        	return myScale(d); //use myScale function to return the cx of the circle
+        })
+
+    d3.select('svg .inner')
+        .selectAll('text')
+        .data(myData)
+        .enter()
+        .append('text')
+        .attr('x', (d) => {
+        	return myScale(d) //assign the x of the text using the myScale function
+        })
+        .attr('y', -8)
+        .text((d) => {
+        	return d;
+        })
+
+    /**
+     * Power scales
+     */
+    d3.select('svg .inner-power') //select the group inner class of the svg
+	    .selectAll('circle') //select all circles, even though they do not exist yet
+	    .data(myData)
+	    .enter() //enter, so that the user can append, we don't need to call merge since there was no data before
+	    .append('circle') //append circle elements for the data in myData
+	    .attr('r',  3)
+	    .attr('cx', (d) => {
+		    return powerScale(d); //use myScale function to return the cx of the circle
+	    })
+
+    d3.select('svg .inner-power')
+	    .selectAll('text')
+	    .data(myData)
+	    .enter()
+	    .append('text')
+	    .attr('x', (d) => {
+		    return powerScale(d) //assign the x of the text using the myScale function
+	    })
+	    .attr('y', -8)
+	    .text((d) => {
+		    return d;
+	    })
+
+    /**
+     * Square root scales
+     */
+    d3.select('svg .inner-square-root')
+        .selectAll('circle')
+        .data(myData)
+        .enter()
+        .append('circle')
+        .attr('r',(d) => {
+        	return squareRootScale(d); //use the square root scale for the radius of the circle
+        })
+        .attr('cx', (d) => {
+        	return myScale(d) // use the linear scale for positioning
+        })
+
+    /**
+     * Log Scales
+     */
+    d3.select('svg .inner-scale-log') //select the group inner class of the svg
+	    .selectAll('circle') //select all circles, even though they do not exist yet
+	    .data(logData)
+	    .enter() //enter, so that the user can append, we don't need to call merge since there was no data before
+	    .append('circle') //append circle elements for the data in myData
+	    .attr('r',  3)
+	    .attr('cx', (d) => {
+		    return logScale(d); //use logScale function to return the cx of the circle
+	    })
+
+    d3.select('svg .inner-scale-log')
+	    .selectAll('text')
+	    .data(logData)
+	    .enter()
+	    .append('text')
+	    .attr('x', (d) => {
+		    return logScale(d) //assign the x of the text using the logScale function
+	    })
+	    .attr('y', -8)
+	    .text((d) => {
+		    return d;
+	    })
+
+    /**
+     * Time Scales
+     */
+    d3.select('svg .inner-scale-time') //select the group inner class of the svg
+	    .selectAll('circle') //select all circles, even though they do not exist yet
+	    .data(dateData)
+	    .enter() //enter, so that the user can append, we don't need to call merge since there was no data before
+	    .append('circle') //append circle elements for the data in myData
+	    .attr('r',  3)
+        .attr('cy', 8)
+	    .attr('cx', (d) => {
+		    return timeScale(d); //use myScale function to return the cx of the circle
+	    })
+
+    d3.select('svg .inner-scale-time')
+	    .selectAll('text')
+	    .data(dateData)
+	    .enter()
+	    .append('text')
+	    .attr('x', (d) => {
+		    return timeScale(d) //assign the x of the text using the timeScale function
+	    })
+	    .attr('y', -8)
+	    .text((d) => {
+		    return d.toDateString(); //since the d is just a new Date(), we can convert it to a string
+	    })
+</script>
+<!--sequential scale, sequential scale + interpolator(s) -->
+<script>
+    let sequentialData = [0,10,20,30,40,50,60,70,80,90,100];
+    let interpolatorsData = d3.range(0, 100, 3);
+
+    let linearScale = d3.scaleLinear().domain([0, 100]).range([0, 900])
+    let seqScale = d3.scaleSequential().domain([0,100]).interpolator(d3['interpolateRainbow']);
+    let sequentialScale = d3.scaleSequential().domain([0,100])
+
+    let interpolators = [
+	    'interpolateViridis',
+	    'interpolateInferno',
+	    'interpolateMagma',
+	    'interpolatePlasma',
+	    'interpolateWarm',
+	    'interpolateCool',
+	    'interpolateRainbow',
+	    'interpolateCubehelixDefault'
+    ]
+
+    function dots (d) {
+    	sequentialScale.interpolator(d3[d])
+
+        d3.select(this)
+            .append('text')
+            .attr('y', -10) //moves the text to the top of the group
+            .text(d)
+
+        console.log(interpolatorsData)
+
+        d3.select(this)
+            .selectAll('rect')
+            .data(interpolatorsData)
+            .enter()
+            .append('rect')
+            .attr('x', (d) => {
+                return linearScale(d)
+            })
+            .attr('width', 25)
+            .attr('height', 30)
+            .style('fill', (d) => {
+            	return sequentialScale(d);
+            })
+    }
+
+    d3.select('svg .inner-scale-sequential-interpolators')
+        .selectAll('g.interpolator')
+        .data(interpolators) //make a new group svg element for every interpolator
+        .enter()
+        .append('g')
+        .classed('interpolator', true)
+        .attr('transform', (d, i) => {
+        	return 'translate(0, ' + (i * 70) + ')';
+        })
+        .each(dots); //passing in the data of the interpolators array
+
+
+    d3.select('svg .inner-scale-sequential')
+	    .selectAll('circle')
+	    .data(sequentialData)
+	    .enter()
+	    .append('circle')
+	    .attr('r', 7.5)
+	    .attr('cx', (d) => {
+		    return linearScale(d);
+	    })
+	    .style('fill', (d) => {
+		    return seqScale(d);
+	    })
+
+</script>
+<!--nice scales -->
+<script>
+    let niceData = [0.243, 0.584, 0.987, 0.153, 0.433];
+    let extent = d3.extent(niceData);
+
+    let linearScaleNotNice = d3.scaleLinear().domain(extent).range([0, 900])
+    let linearScaleForCircles = d3.scaleLinear().domain([0, 1]).range([0, 900])
+    let linearScaleNice = d3.scaleLinear().domain(extent).range([0, 900])
+    linearScaleNice.nice();
+
+    let axis = d3.axisBottom(linearScaleNotNice);
+    let axisNice = d3.axisBottom(linearScaleNice);
+
+    d3.select('.axis-without-nice')
+        .call(axis);
+
+    d3.select('.axis-with-nice')
+        .call(axisNice)
+
+    /**
+     * Circle and text on axis without nice helper
+     */
+    d3.select('.axis-without-nice')
+	    .selectAll('circle')
+	    .data(niceData)
+	    .enter()
+	    .append('circle')
+	    .attr('r', 3)
+	    .attr('cx', (d) => {
+		    return linearScaleForCircles(d);
+	    })
+	    .style('fill', 'orange')
+
+    d3.select('svg .axis-without-nice-text')
+	    .selectAll('text')
+	    .data(niceData)
+	    .enter()
+	    .append('text')
+	    .attr('x', (d) => {
+		    return linearScaleForCircles(d) //assign the x of the text using the myScale function
+	    })
+	    .attr('y', -8)
+	    .text((d) => {
+		    return d;
+	    })
+
+    /**
+     * Circle and text on axis with nice helper
+     */
+    d3.select('.axis-with-nice')
+	    .selectAll('circle')
+	    .data(niceData)
+	    .enter()
+	    .append('circle')
+	    .attr('r', 3)
+	    .attr('cx', (d) => {
+		    return linearScaleForCircles(d);
+	    })
+	    .style('fill', 'orange')
+
+    d3.select('svg .axis-with-nice-text')
+	    .selectAll('text')
+	    .data(niceData)
+	    .enter()
+	    .append('text')
+	    .attr('x', (d) => {
+		    return linearScaleForCircles(d) //assign the x of the text using the myScale function
+	    })
+	    .attr('y', -8)
+	    .text((d) => {
+		    return d;
+	    })
+</script>
+<!--multiple segments -->
+<script>
+    let segmentsData = [-10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10];
+
+    let xScale = d3.scaleLinear().domain([-10,10]).range([0,900])
+    let segmentLinearScale = d3.scaleLinear().domain([-10,0,10]).range(['red', '#ddd', 'blue'])
+
+    d3.select('svg .segments')
+        .selectAll('circle')
+        .data(segmentsData)
+        .enter()
+        .append('circle')
+        .attr('r', 7.5)
+        .attr('cx', (d) => {
+        	return xScale(d)
+        })
+        .style('fill', (d) => {
+        	return segmentLinearScale(d);
+        })
+</script>
+<!--inversion -->
+<script>
+    let width = 900
+
+    let inversionLinearScale = d3.scaleLinear().domain([-50,50]).range([0, width]).nice()
+
+    let clickArea = d3.select('.click-area').node();
+
+    const doClick = () => {
+    	let position = d3.mouse(clickArea);
+    	let xPosition = position[0]; //get the x of the mouse click
+        let value = inversionLinearScale.invert(xPosition); //gets the value when the user clicks on the graph
+        d3.select('.info')
+            .text('You clicked ' + value.toFixed(2))
+    }
+
+    let axisInversion = d3.axisBottom(inversionLinearScale);
+    d3.select('.axis-inversion')
+        .call(axisInversion);
+
+    d3.select('.click-area')
+        .attr('width', width)
+        .attr('height', 40)
+        .style('fill', 'orange')
+        .on('click', doClick)
+
+
+</script>
+<!--scale quantize, scale quantile, scale threshold-->
+<script>
+    let quantizeData = d3.range(0, 100, 2)
+    let quantileData = [0, 5, 7, 10, 20, 25, 30, 35, 40, 50, 60, 62, 65, 70, 75, 80, 90, 100];
+    let thresholdData = d3.range(-10, 110, 2)
+
+    let quantizeLinearScale = d3.scaleLinear().domain([0, 100]).range([0,900])
+    let quantizeScale = d3.scaleQuantize().domain([0, 100]).range(['lightblue', 'orange', 'lightgreen', 'pink'])
+    let quantileScale = d3.scaleQuantile().domain([0, 100]).range(['lightblue', 'orange', 'lightgreen', 'pink'])
+
+    let linearThresholdScale = d3.scaleLinear().domain([-10, 110]).range([0,900])
+    let scaleThreshold = d3.scaleThreshold().domain([0, 50, 100]).range(['#ccc','lightblue','orange','#ccc']);
+
+    d3.select('svg .scale-quantize')
+        .selectAll('rect')
+        .data(quantizeData)
+        .enter()
+        .append('rect')
+        .attr('x', (d) => {
+        	return quantizeLinearScale(d)
+        })
+        .attr('width', 15)
+        .attr('height', 20)
+        .style('fill', (d) => {
+        	return quantizeScale(d)
+        })
+
+    d3.select('svg .scale-quantile')
+        .selectAll('circle')
+        .data(quantileData)
+        .enter()
+        .append('circle')
+        .attr('r', 5)
+        .attr('cx', (d) => {
+        	return quantizeLinearScale(d)
+        })
+        .style('fill', (d) => {
+        	return quantileScale(d)
+        })
+    d3.select('svg .scale-quantile')
+        .selectAll('text')
+        .data(quantileScale.quantiles())
+        .enter()
+        .append('text')
+        .attr('x', (d) => {
+        	return quantizeLinearScale(d);
+        })
+        .attr('y', -8)
+        .text((d) => {
+        	return d;
+        })
+
+    d3.select('svg .scale-threshold')
+        .selectAll('rect')
+        .data(thresholdData)
+        .enter()
+        .append('rect')
+        .attr('x', (d) => {
+        	return linearThresholdScale(d)
+        })
+        .attr('height', 20)
+        .attr('width', 10)
+        .style('fill', (d) => {
+        	return scaleThreshold(d)
+        })
+</script>
+<!--scale ordinal-->
+<script>
+    let ordinalData = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    let ordinalLinearScale = d3.scaleLinear().domain([0, 11]).range([0, 900])
+    let scaleOrdinal = d3.scaleOrdinal().domain(ordinalData).range(['black', '#ccc', '#ea9410'])
+
+    d3.select('svg .scale-ordinal')
+        .selectAll('text')
+        .data(ordinalData)
+        .enter()
+        .append('text')
+        .attr('x', (d, i) => {
+        	return ordinalLinearScale(i)
+        })
+        .text((d) => {
+        	return d
+        })
+        .style('fill', (d) => {
+        	return scaleOrdinal(d);
+        })
+</script>
+<!--scale band-->
+<script>
+    let height = 100
+    let bandData = [
+	    {day : 'Mon', value: 10},
+	    {day : 'Tue', value: 40},
+	    {day : 'Wed', value: 30},
+	    {day : 'Thu', value: 60},
+	    {day : 'Fri', value: 30}
+    ]
+
+    let yScale = d3.scaleLinear().domain([0,100]).range([height, 0]).nice()
+    let bandScale = d3.scaleBand().domain(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']).range([0, 900]).paddingInner(0.05);
+    let xAxisBandScale = d3.scaleBand().domain(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']).range([-5, 905]);
+    let xAxisBand = d3.axisBottom(xAxisBandScale)
+    let yAxisBand = d3.axisLeft(yScale)
+
+
+    d3.select('svg .scale-band-axis').call(xAxisBand);
+    d3.select('svg .scale-band-axis-y').call(yAxisBand);
+
+    d3.select('svg .scale-band')
+        .selectAll('rect')
+        .data(bandData)
+        .enter()
+        .append('rect')
+        .attr('x', (d) => {
+        	return bandScale(d.day)
+        })
+        .attr('width', bandScale.bandwidth())
+        .attr('height', (d) => {
+        	return d.value
+        })
+        .style('fill', 'orange')
+        .attr('y', (d) => {
+        	return height - d.value; //makes the bars level facing up
+        })
+</script>
+<!--scale point-->
+<script>
+	let scaleData = [
+		{day : 'Mon', value: 10},
+		{day : 'Tue', value: 40},
+		{day : 'Wed', value: 30},
+		{day : 'Thu', value: 60},
+		{day : 'Fri', value: 30}
+	]
+
+    let pointScale = d3.scalePoint().domain(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']).range([0, 900])
+
+    d3.select('svg .scale-point')
+        .selectAll('circle')
+        .data(scaleData)
+        .enter()
+        .append('circle')
+        .attr('r', (d) => {
+        	return d.value / 5;
+        })
+        .attr('cx', (d) => {
+        	return pointScale(d.day)
+        })
+        .style('fill', 'orange')
+
+    d3.select('svg .scale-point')
+        .selectAll('text')
+        .data(scaleData)
+        .enter()
+        .append('text')
+        .attr('x', (d) => {
+        	return pointScale(d.day)
+        })
+        .text((d) => {
+        	return d.day + ' ' + d.value
+        })
+        .attr('y', (d) => {
+        	return (d.value / 2.5) * -1
+        })
+</script>
+</body>
+</html>

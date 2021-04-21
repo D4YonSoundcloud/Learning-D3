@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shapes</title>
+</head>
+<style>
+    body {
+        font-family: "Helvetica Neue", Helvetica, sans-serif;
+        font-size: 12px;
+        color: #333;
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        justify-content: center;
+    }
+    path {
+        fill: none;
+        stroke: #999;
+    }
+    p{
+        margin-top: 0.5%;
+        margin-bottom: 0.5%;
+        width: 1000px;
+        text-align: right;
+    }
+    svg{
+        margin-bottom: 0.5%;
+    }
+    path:hover{
+        opacity: 0.75;
+    }
+    circle:hover{
+        stroke: #333333 !important;
+    }
+    rect:hover{
+        stroke: #333333 !important;
+        opacity: 0.75;
+    }
+</style>
+<body>
+    <p>Line</p>
+    <svg width="1000" height="80">
+        <g class="line" transform="translate(20,40)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Line with Scales</p>
+    <svg width="1000" height="160">
+        <g class="line-x-y" transform="translate(20,40)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Line with Defined</p>
+    <svg width="1000" height="120">
+        <g class="line-defined" transform="translate(20,40)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Line with Curve</p>
+    <svg width="1000" height="200">
+        <g class="line-curve" transform="translate(20,40)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Radial Line</p>
+    <svg width="1000" height="200">
+        <g class="radial-line" transform="translate(450,100)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Area Generator</p>
+    <svg width="1000" height="100">
+        <g class="area-generator" transform="translate(200,0)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Area Generator with Baseline (y0)</p>
+    <svg width="1000" height="140">
+        <g class="area-generator-baseline" transform="translate(200,0)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Area Generator with Baselines (y0 + y1)</p>
+    <svg width="1000" height="200">
+        <g class="area-generator-both-baseline" transform="translate(200,0)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Radial Area Generator</p>
+    <svg width="1000" height="200">
+        <g class="radial-area-generator" transform="translate(475,100)">
+            <path d=""></path>
+        </g>
+    </svg>
+    <p>Stack Generator</p>
+    <svg width="1000" height="200">
+        <g class="stack-generator" transform="translate(300,25)">
+        </g>
+    </svg>
+    <svg width="1000" height="200">
+        <g class="stack-generator-area" transform="translate(300,25)">
+        </g>
+    </svg>
+</body>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<!--line generator-->
+<script>
+    let lineGenerator = d3.line();
+    let linePoints = [
+	    [0, 80],
+	    [100, 100],
+	    [200, 30],
+	    [300, 50],
+	    [400, 40],
+	    [500, 80]
+    ]
+
+    let pathData = lineGenerator(linePoints)
+
+    d3.select('svg .line path')
+        .attr('d', pathData)
+</script>
+<!--line x and y accessor functions-->
+<script>
+    let xScale = d3.scaleLinear().domain([0, 6]).range([0,900]);
+    let yScale = d3.scaleLinear().domain([0, 80]).range([150,0]);
+
+    let xyData = [
+	    {value: 10},
+	    {value: 50},
+	    {value: 30},
+	    {value: 40},
+	    {value: 20},
+	    {value: 70},
+	    {value: 50}
+    ]
+
+    const xyLineGenerator = d3.line()
+    xyLineGenerator.x((d, i) => {
+    	return xScale(i)
+    }).y((d) => {
+    	return yScale(d.value);
+    })
+
+    let line = xyLineGenerator(xyData)
+
+    d3.select('svg .line-x-y path')
+        .attr('d', line)
+</script>
+<!--line defined function-->
+<script>
+    let definedPoints = [
+	    [0, 80],
+	    [100, 100],
+	    null,
+	    [300, 50],
+	    [400, 40],
+	    [500, 80]
+    ]
+
+    let definedLineGenerator = d3.line()
+    definedLineGenerator.defined((d) => { return d !== null})
+    let definedPathData = definedLineGenerator(definedPoints)
+
+    d3.select('svg .line-defined path')
+        .attr('d', definedPathData)
+
+</script>
+<!--line with curve function-->
+<script>
+	let xCurveScale = d3.scaleLinear().domain([0, 6]).range([0,900]);
+	let yCurveScale = d3.scaleLinear().domain([0, 80]).range([150,0]);
+
+	let curveData = [
+		{value: 10},
+		{value: 50},
+		{value: 30},
+		{value: 40},
+		{value: 20},
+		{value: 70},
+		{value: 50}
+	]
+
+	const curveLineGenerator = d3.line()
+	curveLineGenerator.x((d, i) => {
+		return xCurveScale(i)
+	}).y((d) => {
+		return yCurveScale(d.value);
+	})
+    curveLineGenerator.curve(d3.curveCardinal);
+
+	let curveLine = curveLineGenerator(xyData)
+
+	d3.select('svg .line-curve path')
+		.attr('d', curveLine)
+
+    d3.select('svg .line-curve')
+        .selectAll('circle')
+        .data(curveData)
+        .enter()
+        .append('circle')
+        .attr('r', 5)
+        .attr('cx', (d, i) => {
+        	return xCurveScale(i)
+        })
+        .attr('cy', (d) => {
+        	return yCurveScale(d.value)
+        })
+        .style('fill', 'rgba(0,0,0,0)')
+        .style('stroke', 'orange');
+</script>
+<!--Radial Line -->
+<script>
+    let radialLineGenerator = d3.radialLine();
+
+    let radialLineData = [
+	    [0, 80],
+	    [Math.PI * 0.25, 80],
+	    [Math.PI * 0.5, 30],
+	    [Math.PI * 0.75, 80],
+	    [Math.PI, 80],
+	    [Math.PI * 1.25, 80],
+	    [Math.PI * 1.5, 80],
+	    [Math.PI * 1.75, 80],
+	    [Math.PI * 2, 80]
+    ]
+
+    let radialPath = radialLineGenerator(radialLineData)
+
+    d3.select('svg .radial-line path')
+        .attr('d', radialPath);
+
+</script>
+<!--Area generator + Area generator with baseline -->
+<script>
+    let areaGenerator = d3.area();
+    let areaGeneratorBaseline = d3.area();
+    let areaPoints = [
+	    [0, 80],
+	    [100, 100],
+	    [200, 30],
+	    [300, 50],
+	    [400, 40],
+	    [500, 80]
+    ]
+
+    areaGeneratorBaseline.y0(150)
+    let areaPathData = areaGenerator(areaPoints);
+    let areaPathDataBaseline = areaGeneratorBaseline(areaPoints);
+
+    d3.select('svg .area-generator path')
+        .attr('d', areaPathData)
+        .style('fill', '#999')
+
+    d3.select('svg .area-generator-baseline path')
+	    .attr('d', areaPathDataBaseline)
+	    .style('fill', '#999')
+</script>
+<!--Area generator with bottom and top baseline -->
+<script>
+    let yBothBaselineScale = d3.scaleLinear().domain([0,100]).range([200,0])
+
+    let bothBaselinePoints = [
+	    {x: 0, low: 30, high: 80},
+	    {x: 100, low: 80, high: 100},
+	    {x: 200, low: 20, high: 30},
+	    {x: 300, low: 20, high: 50},
+	    {x: 400, low: 10, high: 40},
+	    {x: 500, low: 50, high: 80}
+    ]
+
+    let bothBaselineAreaGenerator = d3.area()
+    bothBaselineAreaGenerator
+        .x((d) => {
+    	    return d.x
+        })
+        .y0((d) => {
+        	return yBothBaselineScale(d.low)
+        })
+        .y1((d) => {
+        	return yBothBaselineScale(d.high)
+        })
+    let bothBaselinePathData = bothBaselineAreaGenerator(bothBaselinePoints)
+
+    d3.select('svg .area-generator-both-baseline path')
+        .attr('d', bothBaselinePathData)
+        .style('fill', '#ccc')
+
+</script>
+<!--Radial Area -->
+<script>
+    let radialAreaData = [
+	    {angle: 0, r0: 20, r1: 80},
+	    {angle: Math.PI * 0.25, r0: 20, r1: 40},
+	    {angle: Math.PI * 0.5, r0: 20, r1: 80},
+	    {angle: Math.PI * 0.75, r0: 20, r1: 40},
+	    {angle: Math.PI, r0: 20, r1: 80},
+	    {angle: Math.PI * 1.25, r0: 20, r1: 40},
+	    {angle: Math.PI * 1.5, r0: 20, r1: 80},
+	    {angle: Math.PI * 1.75, r0: 20, r1: 40},
+	    {angle: Math.PI * 2, r0: 20, r1: 80}
+    ]
+
+    let radialAreaGenerator = d3.radialArea()
+    radialAreaGenerator
+        .angle((d) => {
+        	return d.angle
+        })
+        .innerRadius((d) => {
+        	return d.r0
+        })
+        .outerRadius((d) => {
+        	return d.r1
+        })
+    let radialAreaPathData = radialAreaGenerator(radialAreaData);
+
+    d3.select('svg .radial-area-generator path')
+        .attr('d', radialAreaPathData)
+        .style('fill', '#ccc')
+
+</script>
+<!--stack generator (bar) (could not figure out how to do stacked bar charts)-->
+<script>
+	let yBarScale = d3.scaleLinear().domain([0, 1]).range([150, 0]);
+
+	let colors = ['#FBB65B', '#513551', '#de3163'];
+    let height = 120;
+
+	let stackData = [
+		{day: 'Mon', apricots: 120, blueberries: 180, cherries: 100},
+		{day: 'Tue', apricots: 60, blueberries: 185, cherries: 105},
+		{day: 'Wed', apricots: 100, blueberries: 215, cherries: 110},
+		{day: 'Thu', apricots: 80, blueberries: 230, cherries: 105},
+		{day: 'Fri', apricots: 120, blueberries: 240, cherries: 105}
+	];
+
+	let stack = d3.stack().keys(['apricots', 'blueberries','cherries'])
+        .offset(d3.stackOffsetExpand)
+        .order(d3.stackOrderReverse);
+
+	let stackedSeries = stack(stackData);
+
+	console.log(stackedSeries)
+
+	//create element for each series
+    let g = d3.select('svg .stack-generator')
+                .selectAll('.stack-generator.series')
+                .data(stackedSeries)
+                .enter()
+                .append('g')
+                .classed('series', true)
+                .style('fill', (d,i) => {
+        	        return colors[i];
+                })
+
+    //for each series
+    g.selectAll('rect')
+        .data((d) => {
+        	return d
+        })
+        .enter()
+        .append('rect')
+        .attr('height', (d) => {
+        	console.log(d, (d[1] - d[0]), (d[0] - d[1]))
+            return (yBarScale(d[0]) - yBarScale(d[1])) * 0.25;
+        })
+        .attr('y', (d, i) => {
+        	console.log(i);
+        	return (yBarScale(d[0]) * 0.25)
+        })
+        .attr('x', (d,i) => {
+        	return i * 50
+        })
+        .attr('width', 49);
+
+	g.attr('y', (d) => {
+		console.log(d);
+		return height - d
+    })
+</script>
+<!--stack generator (area) -->
+<script>
+
+</script>
+</html>

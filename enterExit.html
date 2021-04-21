@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    body {
+        font-family: "Helvetica Neue", Helvetica, sans-serif;
+        font-size: 14px;
+        color: #333;
+    }
+    #content div {
+        display: inline-block;
+        margin: 2px;
+        background-color: #ddd;
+        color: white;
+        padding: 8px;
+        width: 14px;
+        height: 14px;
+        text-align: center;
+    }
+    #content div.new{
+        background-color: orange;
+    }
+</style>
+<body>
+    <div id="content">
+    </div>
+
+    <div id="menu">
+        <button onClick="doUpdate();">Update existing elements</button>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+<script>
+    let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    const doUpdate = () => {
+    	let random = Math.floor( Math.random() * 26);
+    	let myData = letters.slice(0, random).split('');
+    	update(myData)
+    }
+
+    //elements entering will be colored orange, while those that are already there will not be colored orange
+    //because they are not considered 'new' elements
+    const update = ( data ) => {
+    	let u = d3.select('#content').selectAll('div').data(data);
+
+    	u.enter().append('div')
+            .classed('new', true)
+            .text((d) => { return d });
+
+    	u.text((d) => {return d })
+            .classed('new', false)
+
+
+    	u.exit().remove();
+    }
+</script>
+</body>
+</html>

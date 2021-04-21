@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    circle {
+        fill: #ddd;
+    }
+    circle.high {
+        fill: orange;
+    }
+    body{
+        font-family: 'Helvetica Neue', Helvetica, sans-serif;
+        font-size: 12px;
+        color: #333;
+    }
+    rect{
+        fill: steelblue;
+    }
+    rect:hover{
+        fill: orange;
+    }
+    text{
+        text-anchor: end;
+    }
+</style>
+<body>
+    <svg width="760" height="140">
+        <g transform="translate(70, 70)">
+            <circle />
+            <circle />
+            <circle />
+            <circle />
+            <circle />
+        </g>
+    </svg>
+    <svg width="760" height="140">
+        <g transform="translate(70, 70)">
+            <circle class="cities-circle"/>
+            <circle class="cities-circle"/>
+            <circle class="cities-circle"/>
+            <circle class="cities-circle"/>
+            <circle class="cities-circle"/>
+        </g>
+    </svg>
+    <svg width="760" height="140">
+        <g transform="translate(70, 30)">
+            <rect />
+            <rect />
+            <rect />
+            <rect />
+            <rect />
+        </g>
+        <g transform="translate(70, 30)">
+            <text />
+            <text />
+            <text />
+            <text />
+            <text />
+        </g>
+    </svg>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+<script>
+    let myData = [ 10, 40, 20, 30, 50 ]
+    let citiesData = [
+	    {name: 'London', population: 8674000},
+	    {name: 'New York', population: 8406000},
+	    {name: 'Sydney', population: 4293000},
+	    {name: 'Paris', population: 2244000},
+	    {name: 'Beijing', population: 11510000}
+    ];
+
+    let s = d3.selectAll('circle');
+    let citiesSelection = d3.selectAll('.cities-circle')
+    let rectCitiesSelection = d3.selectAll('rect');
+    let textCitiesSelection = d3.selectAll('text');
+
+    //data join
+    s.data(myData);
+    citiesSelection.data(citiesData);
+    rectCitiesSelection.data(citiesData);
+    textCitiesSelection.data(citiesData);
+
+    //myData
+    s.attr('r', (d) => { return d })
+    s.classed('high', (d) => {
+    	return d >= 40; //returns true if above 40 and false if below 40, will add the class if it is true
+    })
+    //positions the circles on the x axis in px
+    s.attr('cx', (d, i) => {
+    	return i * 120;
+    })
+
+    //cities data
+    citiesSelection.attr('r', (d) => {
+    	let scaleFactor = 0.000005;
+    	return d.population * scaleFactor;
+    }).attr('cx', (d, i) => {
+    	return i * 120;
+    })
+
+    //join cities to the rect elements and modify the height, width, and position
+    rectCitiesSelection.attr('height', 19)
+        .attr('width', (d) => {
+        	let scaleFactor = 0.00004;
+        	return d.population * scaleFactor;
+        })
+        .attr('y', (d,i) => {
+        	return i * 20;
+        })
+
+    //join cities to text elements and modify content and position
+    textCitiesSelection.attr('y', (d, i) => {
+	        return i * 20 + 13 //13 is to offset the fontsize
+        })
+        .attr('x', -4)
+        .text((d) => { return d.name })
+
+
+
+</script>
+</body>
+</html>

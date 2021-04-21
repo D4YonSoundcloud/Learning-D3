@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    body {
+        font-family: 'Helvetica Neue', Helvetica, sans-serif;
+        font-size: 14px;
+    }
+    .person{
+        height: 20px;
+        position: relative;
+    }
+    .person .label {
+        width: 90px;
+        text-align: right;
+    }
+    .person .bar {
+        height: 19px;
+        background-color: steelblue;
+        position: absolute;
+        left: 100px;
+    }
+    .person div {
+        display: inline-block
+    }
+    .menu {
+        margin-top: 20px;
+    }
+    .score {
+        width: 100px;
+        position: absolute;
+        left: 300px;
+    }
+    circle {
+        fill: #ddd;
+    }
+
+</style>
+<body>
+    <div id="wrapper">
+    </div>
+
+    <div class="menu" style="margin-left: 1.5%">　　　　　
+        <button onclick="sort()">Sort</button>
+    </div>
+
+    <svg width="740" height="140">
+        <g transform="translate(70, 70)">
+            <circle class="sort-circle" r="40" />
+            <circle class="sort-circle" r="40" cx="120" />
+            <circle class="sort-circle" r="40" cx="240" />
+            <circle class="sort-circle" r="40" cx="360" />
+            <circle class="sort-circle" r="40" cx="480" />
+        </g>
+    </svg>
+
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+    let myData = [
+	    {
+		    "name": "Andy",
+		    "score": 33
+	    },
+	    {
+		    "name": "Beth",
+		    "score": 39
+	    },
+	    {
+		    "name": "Craig",
+		    "score": 25
+	    },
+	    {
+		    "name": "Diane",
+		    "score": 28
+	    },
+	    {
+		    "name": "Evelyn",
+		    "score": 20
+	    }
+    ];
+
+    let barWidth = 400;
+    //set the min to 0 and the max to 100, then set the width of the scale to 400 (px)
+    let barScale = d3.scaleLinear().domain([0, 100]).range([0, barWidth]);
+
+    let u = d3.select('#wrapper')
+        .selectAll('.person')
+        .data(myData);
+
+    let entering = u.enter()
+        .append('div')
+        .classed('person', true)
+
+    entering.append('div')
+        .classed('label', true)
+        .text((d) => {
+        	return d.name;
+        })
+
+    entering.append('div')
+        .classed('bar', true)
+        .style('width', (d) => {
+        	return barScale(d.score) + 'px';
+        })
+
+    entering.append('div')
+	    .classed('score', true)
+	    .text((d) => {
+		    return 'Score: ' + d.score;
+	    })
+
+    const sort = () => {
+    	d3.selectAll('.person')
+            .sort((a,b) => {
+            	return b.score - a.score;
+            });
+
+    	let scoresArray = () => {
+    		let arrayToReturn = [];
+    		for(const person of myData){
+    			arrayToReturn.push(person.score);
+            }
+    		arrayToReturn.sort(compareNumbers)
+            return arrayToReturn
+        }
+
+        d3.selectAll('.sort-circle')
+            .each(function (d, i) {
+            	d3.select(this)
+                    .transition()
+                    .duration(500)
+                    .attr('r', scoresArray()[i])
+            	    .style('fill', `rgba(255,165,0)`)
+            })
+            .each(function (d, i) {
+            	d3.select(this)
+                    .transition()
+                    .delay(1000)
+                    .duration(500)
+            	    .attr('r', (d) => { return d.score })
+                    .style('fill', '#ddd')
+            })
+    }
+
+    setInterval(() => {
+    	sort();
+    }, 2000)
+
+    d3.selectAll('.sort-circle')
+        .data(myData)
+        .attr('r', (d) => {
+        	return d.score;
+        })
+
+    const compareNumbers = (a,b) => {
+    	return a - b
+    }
+
+
+</script>
+</body>
+</html>

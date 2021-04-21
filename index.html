@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    path {
+        fill: none;
+        stroke: #aaa;
+    }
+</style>
+<body>
+<svg width="600" height="100">
+    <path transform="translate(200,0)"></path>
+</svg>
+
+<svg width="600" height="100">
+    <path class="curve" transform="translate(200,0)"></path>
+</svg>
+
+<svg width="650" height="40">
+    <g class="axis" transform="translate(200,20)"></g>
+</svg>
+
+<svg width="700" height="40">
+    <g class="formatted-axis" transform="translate(200,20)"></g>
+</svg>
+
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+	let data = [[0, 50], [100, 80], [200, 40], [300, 60], [400, 30]];
+
+	//connecting points
+	let lineGenerator = d3.line();
+	let pathString = lineGenerator(data);
+
+	//connecting points + curve
+	let curveLineGenerator = d3.line().curve(d3.curveNatural);
+	let curvePathString = curveLineGenerator(data);
+
+	//axis at the bottom
+	let scale = d3.scaleLinear().domain([0, 1000]).range([0, 400]);
+	let axis = d3.axisBottom().scale(scale);
+
+	//formatted axis
+	let formattedScale = d3.scaleLinear().domain([0, 800000]).range([0, 400]);
+	let format = d3.format(",");
+
+	let formattedAxis = d3.axisBottom().scale(formattedScale).tickFormat((data) => {
+		return '$' + format(data)
+	}).ticks(4);
+
+	d3.select('.formatted-axis').call(formattedAxis)
+
+	d3.select('.axis').call(axis)
+	d3.select('path').attr('d', pathString);
+	d3.select('.curve').attr('d', curvePathString);
+</script>
+</body>
+</html>
